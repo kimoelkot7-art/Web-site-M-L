@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>M&L | إكسسوارات</title>
 <meta name="description" content="M&L - إكسسوارات مختارة بعناية: سلاسل، خواتم، أساور، ساعات وكومبوهات. اطلب واتساب في ثانية.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="M&L">
+<meta property="og:title" content="M&L | إكسسوارات مختارة بعناية">
+<meta property="og:description" content="سلاسل، خواتم، أساور، ساعات وكومبوهات - اطلب واتساب في ثانية، دفع عند الاستلام.">
+<meta property="og:url" content="https://is.gd/mlstore">
+<meta property="og:image" content="https://kimoelkot7-art.github.io/ml-assistant/bot/catalog/p1795648620709.jpg">
+<meta property="og:locale" content="ar_EG">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23100e14'/%3E%3Ctext x='32' y='41' font-family='Georgia,serif' font-size='24' font-weight='700' fill='%23eca134' text-anchor='middle'%3EM%26L%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
@@ -132,6 +141,7 @@ section{padding:44px 0;}
   background:var(--green); color:#062b16; font-weight:800; font-size:13.5px; transition:.2s;
 }
 .order-btn:hover{filter:brightness(1.12);}
+.co-note{margin-top:12px; font-size:13px; text-align:center; color:var(--ivory-2);}
 .add-btn{
   width:42px; border-radius:999px; border:1.5px solid var(--line);
   font-size:18px; font-weight:800; color:var(--amber); transition:.2s;
@@ -285,6 +295,7 @@ footer{border-top:1px solid var(--line); padding:26px 0; text-align:center; colo
       <a href="#contact" data-i18n="nav_contact">تواصل معنا</a>
     </nav>
     <div style="display:flex; gap:10px; align-items:center;">
+      <button class="lang-btn" id="shareBtn" aria-label="share" title="شارك المتجر">📤</button>
       <button class="lang-btn" id="langBtn">EN</button>
       <button class="burger" id="burger" aria-label="menu"><span></span><span></span><span></span></button>
     </div>
@@ -389,6 +400,7 @@ footer{border-top:1px solid var(--line); padding:26px 0; text-align:center; colo
     <div class="wallets" id="walletBox"></div>
     <p class="form-err" id="coErr"></p>
     <button class="btn btn-green co-submit" id="coSubmit" data-i18n="co_submit">تأكيد وإرسال واتساب ✅</button>
+    <p class="co-note" data-i18n="co_note">هنأكد أوردرك على واتساب خلال دقائق ⏱️</p>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -440,6 +452,9 @@ const I18N = {
     co_pay_cod:"كاش عند الاستلام", co_pay_wallet:(w)=>`تحويل محفظة (${w})`, co_instapay:"ادفع بانستاباي ⚡",
     co_subtotal:"المجموع", co_discount:"خصم 15%", co_total:"الإجمالي",
     co_hint:(x)=>`فاضل ${x} جنيه وتاخد خصم 15% 🎁`,
+    co_note:"هنأكد أوردرك على واتساب خلال دقائق ⏱️",
+    share_text:"اكسسوارات M&L ✨ شوف التشكيلة واطلب واتساب",
+    share_copied:"اتنسخ لينك المتجر ✅",
     totals:(sub,disc,total)=> disc>0 ? `المجموع: ${sub} جنيه\nخصم 15%: -${disc} جنيه\nالإجمالي: ${total} جنيه` : `الإجمالي: ${total} جنيه`,
     msg_order:(lines,totalsText,name,phone,addr,pay)=>`السلام عليكم 👋 أوردر جديد من الموقع 🛍️\n${lines}\n${totalsText}\n—————\nالاسم: ${name}\nالموبايل: ${phone}\nالعنوان: ${addr}\nالدفع: ${pay}`,
     cat_all:"الكل", cat_men:"رجالي", feat_badge:"وايت فرايداي",
@@ -472,6 +487,9 @@ const I18N = {
     co_pay_cod:"Cash on delivery", co_pay_wallet:(w)=>`Wallet transfer (${w})`, co_instapay:"Pay with InstaPay ⚡",
     co_subtotal:"Subtotal", co_discount:"Discount 15%", co_total:"Total",
     co_hint:(x)=>`Add ${x} EGP more to get 15% off 🎁`,
+    co_note:"We'll confirm your order on WhatsApp within minutes ⏱️",
+    share_text:"M&L accessories ✨ browse the collection and order on WhatsApp",
+    share_copied:"Store link copied ✅",
     totals:(sub,disc,total)=> disc>0 ? `Subtotal: ${sub} EGP\nDiscount 15%: -${disc} EGP\nTotal: ${total} EGP` : `Total: ${total} EGP`,
     msg_order:(lines,totalsText,name,phone,addr,pay)=>`Hi 👋 New order from the website 🛍️\n${lines}\n${totalsText}\n—————\nName: ${name}\nMobile: ${phone}\nAddress: ${addr}\nPayment: ${pay}`,
     cat_all:"All", cat_men:"Men", feat_badge:"White Friday",
@@ -564,7 +582,7 @@ function cardHTML(card, idx, featured){
       <p class="card-line">${d}</p>
       <div class="card-foot"><span class="price">${card.price} <small>${T().egp}</small></span></div>
       <div class="card-actions">
-        <a class="order-btn" target="_blank" rel="noopener" href="${waLink(T().msg_one(t, card.price))}">${T().order_wa}</a>
+        <button class="order-btn" data-quick="${idx}">${T().order_wa}</button>
         <button class="add-btn" data-add="${idx}" aria-label="add">+</button>
       </div>
     </div>
@@ -627,6 +645,16 @@ function renderAll(){
 document.addEventListener('click', e=>{
   const chip = e.target.closest('[data-cat]');
   if(chip){ activeCat = chip.dataset.cat; renderChips(); renderGrid(); return; }
+
+  const quick = e.target.closest('[data-quick]');
+  if(quick){
+    cart.push(+quick.dataset.quick);
+    renderCart();
+    renderCheckout();
+    $('#coErr').classList.remove('show');
+    $('#coModal').classList.add('open');
+    return;
+  }
 
   const add = e.target.closest('[data-add]');
   if(add){
@@ -771,6 +799,20 @@ $('#coSubmit').addEventListener('click', ()=>{
 });
 
 $('#langBtn').addEventListener('click', ()=>{ LANG = LANG==='ar' ? 'en' : 'ar'; renderAll(); });
+$('#shareBtn').addEventListener('click', async ()=>{
+  const url = 'https://is.gd/mlstore';
+  if(navigator.share){
+    try{ await navigator.share({title:'M&L | إكسسوارات', text:T().share_text, url}); }catch(e){}
+  }else{
+    try{
+      await navigator.clipboard.writeText(url);
+      const toast = $('#toast');
+      toast.textContent = T().share_copied;
+      toast.classList.add('show');
+      clearTimeout(toast._t); toast._t = setTimeout(()=>toast.classList.remove('show'), 1800);
+    }catch(e){ window.prompt(url); }
+  }
+});
 $('#burger').addEventListener('click', ()=> $('#mobileMenu').classList.toggle('open'));
 document.querySelectorAll('.mobile-menu a').forEach(a=> a.addEventListener('click', ()=> $('#mobileMenu').classList.remove('open')));
 
