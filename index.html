@@ -186,6 +186,58 @@ section{padding:44px 0;}
 }
 .cart-pill.show{display:flex;}
 
+/* ---------- checkout modal ---------- */
+.modal-bg{
+  position:fixed; inset:0; z-index:80; display:none;
+  background:rgba(10,8,14,.75); backdrop-filter:blur(4px);
+  align-items:flex-end; justify-content:center;
+}
+.modal-bg.open{display:flex;}
+.modal{
+  background:var(--noir-2); border:1px solid var(--line); border-bottom:none;
+  border-radius:22px 22px 0 0; width:100%; max-width:520px; max-height:92vh;
+  overflow-y:auto; padding:22px 20px 28px;
+}
+.modal h3{font-size:22px; text-align:center; margin-bottom:14px;}
+.co-items{margin-bottom:14px;}
+.co-line{display:flex; justify-content:space-between; font-size:14.5px; padding:6px 2px; border-bottom:1px dashed var(--line);}
+.co-line .q{color:var(--amber); font-weight:700;}
+.co-total{display:flex; justify-content:space-between; font-weight:800; font-size:16px; padding:10px 2px 0; color:var(--amber);}
+.field{margin-bottom:12px;}
+.field label{display:block; font-size:13px; color:var(--ivory-2); margin-bottom:5px; font-weight:700;}
+.field input, .field textarea{
+  width:100%; background:var(--card); border:1.5px solid var(--line); border-radius:12px;
+  padding:11px 14px; color:var(--ivory); font-family:inherit; font-size:15px;
+}
+.field input:focus, .field textarea:focus{outline:none; border-color:var(--amber);}
+.field textarea{resize:vertical; min-height:64px;}
+.pay-opts{display:grid; gap:10px; margin-bottom:14px;}
+.pay-opt{
+  display:flex; align-items:center; gap:12px; text-align:start;
+  background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:13px 16px;
+  font-weight:700; font-size:14.5px; transition:.2s; width:100%;
+}
+.pay-opt.sel{border-color:var(--amber); background:rgba(236,161,52,.1);}
+.pay-opt .radio{width:18px; height:18px; border-radius:50%; border:2px solid var(--ivory-2); flex-shrink:0;}
+.pay-opt.sel .radio{border-color:var(--amber); background:var(--amber);}
+.wallets{display:none; gap:10px; margin-bottom:14px;}
+.wallets.show{display:grid;}
+.wallet-row{
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--card); border:1px solid var(--line); border-radius:12px; padding:11px 16px;
+}
+.wallet-row .wn{font-size:13px; color:var(--ivory-2);}
+.wallet-row .wnum{font-weight:800; font-size:16px; letter-spacing:1px;}
+.copy-btn{
+  border:1.5px solid var(--line); border-radius:999px; padding:5px 14px;
+  font-size:12px; font-weight:700; color:var(--amber); transition:.2s;
+}
+.copy-btn:hover{border-color:var(--amber);}
+.co-submit{width:100%; justify-content:center; font-size:16px; padding:15px;}
+.co-close{position:absolute; top:14px; inset-inline-end:16px; font-size:22px; color:var(--ivory-2);}
+.form-err{color:#ff7b7b; font-size:13px; text-align:center; margin-bottom:10px; display:none;}
+.form-err.show{display:block;}
+
 /* ---------- toast ---------- */
 .toast{
   position:fixed; top:74px; left:50%; transform:translateX(-50%) translateY(-16px);
@@ -293,6 +345,10 @@ footer{border-top:1px solid var(--line); padding:26px 0; text-align:center; colo
         <div class="ico">🤖</div>
         <div><p class="lbl" data-i18n="lbl_bot">المساعد الذكي</p><p class="val" data-i18n="lbl_bot_val">اسأل عن أي منتج أو توفر - بيرد فورًا</p></div>
       </a>
+      <a class="contact-row" id="igRow" style="display:none;" target="_blank" rel="noopener">
+        <div class="ico">📸</div>
+        <div><p class="lbl" data-i18n="lbl_ig">انستجرام</p><p class="val" data-i18n="lbl_ig_val">تابع لوكات وتنسيقات يومية</p></div>
+      </a>
       <a class="contact-row" href="https://www.facebook.com/share/1JY8V9kRdZ/" target="_blank" rel="noopener">
         <div class="ico">📘</div>
         <div><p class="lbl" data-i18n="lbl_fb">فيسبوك</p><p class="val" data-i18n="lbl_fb_val">تابع كل جديدنا أول بأول</p></div>
@@ -307,6 +363,24 @@ footer{border-top:1px solid var(--line); padding:26px 0; text-align:center; colo
 
 <a class="float-bot" id="floatBot" target="_blank" rel="noopener" aria-label="assistant" title="المساعد الذكي">🤖</a>
 <button class="cart-pill" id="cartPill"></button>
+
+<div class="modal-bg" id="coModal">
+  <div class="modal" style="position:relative;">
+    <button class="co-close" id="coClose" aria-label="close">✕</button>
+    <h3 data-i18n="co_title">إتمام الأوردر 🛍️</h3>
+    <div class="co-items" id="coItems"></div>
+    <div class="field"><label data-i18n="co_name">الاسم</label><input id="fName" type="text"></div>
+    <div class="field"><label data-i18n="co_phone">رقم الموبايل</label><input id="fPhone" type="tel" inputmode="numeric" dir="ltr" style="text-align:end;" placeholder="01xxxxxxxxx"></div>
+    <div class="field"><label data-i18n="co_addr">العنوان بالتفصيل (المحافظة - المنطقة - الشارع)</label><textarea id="fAddr"></textarea></div>
+    <div class="pay-opts">
+      <button class="pay-opt sel" data-pay="cod"><span class="radio"></span><span data-i18n="co_cod">كاش عند الاستلام 💵</span></button>
+      <button class="pay-opt" data-pay="wallet"><span class="radio"></span><span data-i18n="co_wallet">تحويل محفظة إلكترونية 📲</span></button>
+    </div>
+    <div class="wallets" id="walletBox"></div>
+    <p class="form-err" id="coErr"></p>
+    <button class="btn btn-green co-submit" id="coSubmit" data-i18n="co_submit">تأكيد وإرسال واتساب ✅</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -317,7 +391,14 @@ const CONFIG = {
   catalog: "https://kimoelkot7-art.github.io/ml-assistant/bot/catalog.json",
   imgBase: "https://kimoelkot7-art.github.io/ml-assistant/bot/",
   bannerAr: "خصم 15% على أي أوردر فوق 500 جنيه 🔥 عروض White Friday شغالة دلوقتي ⏰",
-  bannerEn: "15% off any order over 500 EGP 🔥 White Friday deals running now ⏰"
+  bannerEn: "15% off any order over 500 EGP 🔥 White Friday deals running now ⏰",
+  wallets: [
+    {nameAr:"فودافون كاش", nameEn:"Vodafone Cash", num:"01060030787"},
+    {nameAr:"اتصالات كاش", nameEn:"Etisalat Cash", num:"01150617769"},
+    {nameAr:"انستاباي", nameEn:"InstaPay", num:"lotfy21@instapay"}
+  ],
+  instapayLink: "https://ipn.eg/S/lotfy21/instapay/1Rfjeo",
+  instagram: ""  /* e.g. "https://instagram.com/HANDLE" - row hidden while empty */
 };
 /* ======================================================= */
 
@@ -336,11 +417,18 @@ const I18N = {
     contact_title:"تواصل معنا", contact_sub:"أسرع رد دايمًا على واتساب",
     lbl_wa:"واتساب الطلبات", lbl_bot:"المساعد الذكي", lbl_bot_val:"اسأل عن أي منتج أو توفر - بيرد فورًا",
     lbl_fb:"فيسبوك", lbl_fb_val:"تابع كل جديدنا أول بأول",
+    lbl_ig:"انستجرام", lbl_ig_val:"تابع لوكات وتنسيقات يومية",
     footer:"M&L © 2026 - صنع بحب في مصر 🇪🇬",
     egp:"جنيه", order_wa:"اطلب واتساب", added:"اتضاف للأوردر ✅",
     cart:(n,t)=>`الأوردر • ${n} قطعة • ${t} جنيه - ابعت واتساب`,
     msg_one:(t,p)=>`السلام عليكم 👋 عايز أطلب: ${t} - ${p} جنيه`,
     msg_cart:(lines,t)=>`السلام عليكم 👋 عايز أطلب:\n${lines}\nالإجمالي: ${t} جنيه`,
+    co_title:"إتمام الأوردر 🛍️", co_name:"الاسم", co_phone:"رقم الموبايل", co_addr:"العنوان بالتفصيل (المحافظة - المنطقة - الشارع)",
+    co_cod:"كاش عند الاستلام 💵", co_wallet:"تحويل محفظة إلكترونية 📲", co_submit:"تأكيد وإرسال واتساب ✅",
+    co_err_fill:"من فضلك كمّل الاسم ورقم الموبايل والعنوان", co_err_phone:"رقم الموبايل لازم يكون 11 رقم ويبدأ بـ 01",
+    co_copy:"نسخ", co_copied:"اتنسخ ✅",
+    co_pay_cod:"كاش عند الاستلام", co_pay_wallet:(w)=>`تحويل محفظة (${w})`, co_instapay:"ادفع بانستاباي ⚡",
+    msg_order:(lines,total,name,phone,addr,pay)=>`السلام عليكم 👋 أوردر جديد من الموقع 🛍️\n${lines}\nالإجمالي: ${total} جنيه\n—————\nالاسم: ${name}\nالموبايل: ${phone}\nالعنوان: ${addr}\nالدفع: ${pay}`,
     cat_all:"الكل", cat_men:"رجالي", feat_badge:"وايت فرايداي",
     cats:{"سلاسل":"سلاسل","خواتم":"خواتم","أساور":"أساور","أطقم":"أطقم","ساعات":"ساعات"}
   },
@@ -358,11 +446,18 @@ const I18N = {
     contact_title:"Contact Us", contact_sub:"Fastest reply is always on WhatsApp",
     lbl_wa:"Orders WhatsApp", lbl_bot:"Smart Assistant", lbl_bot_val:"Ask about any product or availability - instant replies",
     lbl_fb:"Facebook", lbl_fb_val:"Follow every new drop first",
+    lbl_ig:"Instagram", lbl_ig_val:"Daily looks and styling ideas",
     footer:"M&L © 2026 - Made with love in Egypt 🇪🇬",
     egp:"EGP", order_wa:"Order on WhatsApp", added:"Added to your order ✅",
     cart:(n,t)=>`Order • ${n} items • ${t} EGP - send on WhatsApp`,
     msg_one:(t,p)=>`Hi 👋 I'd like to order: ${t} - ${p} EGP`,
     msg_cart:(lines,t)=>`Hi 👋 I'd like to order:\n${lines}\nTotal: ${t} EGP`,
+    co_title:"Complete your order 🛍️", co_name:"Name", co_phone:"Mobile number", co_addr:"Full address (Governorate - Area - Street)",
+    co_cod:"Cash on delivery 💵", co_wallet:"E-wallet transfer 📲", co_submit:"Confirm and send on WhatsApp ✅",
+    co_err_fill:"Please fill in your name, mobile number and address", co_err_phone:"Mobile number must be 11 digits starting with 01",
+    co_copy:"Copy", co_copied:"Copied ✅",
+    co_pay_cod:"Cash on delivery", co_pay_wallet:(w)=>`Wallet transfer (${w})`, co_instapay:"Pay with InstaPay ⚡",
+    msg_order:(lines,total,name,phone,addr,pay)=>`Hi 👋 New order from the website 🛍️\n${lines}\nTotal: ${total} EGP\n—————\nName: ${name}\nMobile: ${phone}\nAddress: ${addr}\nPayment: ${pay}`,
     cat_all:"All", cat_men:"Men", feat_badge:"White Friday",
     cats:{"سلاسل":"Necklaces","خواتم":"Rings","أساور":"Bracelets","أطقم":"Sets","ساعات":"Watches"}
   }
@@ -509,6 +604,8 @@ function renderAll(){
   $('#botRow').href = CONFIG.bot;
   $('#floatBot').href = CONFIG.bot;
   $('#waRow').href = waLink(LANG==='ar' ? 'السلام عليكم 👋 عندي استفسار' : "Hi 👋 I have a question");
+  const ig = $('#igRow');
+  if(CONFIG.instagram){ ig.style.display=''; ig.href = CONFIG.instagram; } else { ig.style.display='none'; }
 }
 
 document.addEventListener('click', e=>{
@@ -547,14 +644,73 @@ document.addEventListener('click', e=>{
   }
 });
 
-$('#cartPill').addEventListener('click', ()=>{
-  const lines = cart.map(i=>{
+/* ---------- checkout ---------- */
+let payMethod = 'cod';
+
+function cartSummary(){
+  const counts = {};
+  cart.forEach(i=> counts[i]=(counts[i]||0)+1);
+  const lines = Object.keys(counts).map(i=>{
     const c = CARDS[i];
     const t = LANG==='ar'? c.t : c.te;
-    return `- ${t} - ${c.price} ${T().egp}`;
-  }).join('\n');
-  const total = cart.reduce((s,i)=>s+CARDS[i].price,0);
-  window.open(waLink(T().msg_cart(lines,total)), '_blank');
+    return {text:`• ${t} ×${counts[i]} - ${c.price*counts[i]} ${T().egp}`, amt:c.price*counts[i]};
+  });
+  const total = lines.reduce((s,l)=>s+l.amt,0);
+  return {lines, total};
+}
+
+function renderWallets(){
+  $('#walletBox').innerHTML = CONFIG.wallets.map((w,i)=>`
+    <div class="wallet-row">
+      <div><p class="wn">${LANG==='ar'?w.nameAr:w.nameEn}</p><p class="wnum" dir="ltr">${w.num}</p></div>
+      <button class="copy-btn" data-copy="${w.num}">${T().co_copy}</button>
+    </div>`).join('')
+    + `<a class="btn btn-green co-submit" style="text-align:center;" href="${CONFIG.instapayLink}" target="_blank" rel="noopener">${T().co_instapay}</a>`;
+}
+
+$('#cartPill').addEventListener('click', ()=>{
+  if(!cart.length) return;
+  const {lines,total} = cartSummary();
+  $('#coItems').innerHTML = lines.map(l=>`<div class="co-line"><span>${l.text}</span></div>`).join('')
+    + `<div class="co-total"><span>${LANG==='ar'?'الإجمالي':'Total'}</span><span>${total} ${T().egp}</span></div>`;
+  renderWallets();
+  $('#walletBox').classList.toggle('show', payMethod==='wallet');
+  $('#coErr').classList.remove('show');
+  $('#coModal').classList.add('open');
+});
+$('#coClose').addEventListener('click', ()=> $('#coModal').classList.remove('open'));
+$('#coModal').addEventListener('click', e=>{ if(e.target===e.currentTarget) $('#coModal').classList.remove('open'); });
+
+document.querySelectorAll('.pay-opt').forEach(b=> b.addEventListener('click', ()=>{
+  payMethod = b.dataset.pay;
+  document.querySelectorAll('.pay-opt').forEach(x=> x.classList.toggle('sel', x===b));
+  $('#walletBox').classList.toggle('show', payMethod==='wallet');
+}));
+
+document.addEventListener('click', e=>{
+  const cp = e.target.closest('[data-copy]');
+  if(cp){
+    navigator.clipboard && navigator.clipboard.writeText(cp.dataset.copy);
+    cp.textContent = T().co_copied;
+    setTimeout(()=> cp.textContent = T().co_copy, 1500);
+  }
+});
+
+$('#coSubmit').addEventListener('click', ()=>{
+  const name = $('#fName').value.trim();
+  const phone = $('#fPhone').value.trim().replace(/\s/g,'');
+  const addr = $('#fAddr').value.trim();
+  const err = $('#coErr');
+  if(!name || !phone || !addr){ err.textContent = T().co_err_fill; err.classList.add('show'); return; }
+  if(!/^01\d{9}$/.test(phone)){ err.textContent = T().co_err_phone; err.classList.add('show'); return; }
+  err.classList.remove('show');
+  const {lines,total} = cartSummary();
+  const walletNames = CONFIG.wallets.map(w=>`${LANG==='ar'?w.nameAr:w.nameEn} ${w.num}`).join(' / ');
+  const pay = payMethod==='cod' ? T().co_pay_cod : T().co_pay_wallet(walletNames);
+  const msg = T().msg_order(lines.map(l=>l.text).join('\n'), total, name, phone, addr, pay);
+  window.open(waLink(msg), '_blank');
+  cart = []; renderCart();
+  $('#coModal').classList.remove('open');
 });
 
 $('#langBtn').addEventListener('click', ()=>{ LANG = LANG==='ar' ? 'en' : 'ar'; renderAll(); });
