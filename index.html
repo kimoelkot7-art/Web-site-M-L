@@ -237,6 +237,7 @@ section{padding:44px 0;}
 .co-close{position:absolute; top:14px; inset-inline-end:16px; font-size:22px; color:var(--ivory-2);}
 .form-err{color:#ff7b7b; font-size:13px; text-align:center; margin-bottom:10px; display:none;}
 .form-err.show{display:block;}
+.hint{font-size:13px; color:var(--amber); text-align:center; margin-top:8px; font-weight:700;}
 
 /* ---------- toast ---------- */
 .toast{
@@ -428,7 +429,10 @@ const I18N = {
     co_err_fill:"من فضلك كمّل الاسم ورقم الموبايل والعنوان", co_err_phone:"رقم الموبايل لازم يكون 11 رقم ويبدأ بـ 01",
     co_copy:"نسخ", co_copied:"اتنسخ ✅",
     co_pay_cod:"كاش عند الاستلام", co_pay_wallet:(w)=>`تحويل محفظة (${w})`, co_instapay:"ادفع بانستاباي ⚡",
-    msg_order:(lines,total,name,phone,addr,pay)=>`السلام عليكم 👋 أوردر جديد من الموقع 🛍️\n${lines}\nالإجمالي: ${total} جنيه\n—————\nالاسم: ${name}\nالموبايل: ${phone}\nالعنوان: ${addr}\nالدفع: ${pay}`,
+    co_subtotal:"المجموع", co_discount:"خصم 15%", co_total:"الإجمالي",
+    co_hint:(x)=>`فاضل ${x} جنيه وتاخد خصم 15% 🎁`,
+    totals:(sub,disc,total)=> disc>0 ? `المجموع: ${sub} جنيه\nخصم 15%: -${disc} جنيه\nالإجمالي: ${total} جنيه` : `الإجمالي: ${total} جنيه`,
+    msg_order:(lines,totalsText,name,phone,addr,pay)=>`السلام عليكم 👋 أوردر جديد من الموقع 🛍️\n${lines}\n${totalsText}\n—————\nالاسم: ${name}\nالموبايل: ${phone}\nالعنوان: ${addr}\nالدفع: ${pay}`,
     cat_all:"الكل", cat_men:"رجالي", feat_badge:"وايت فرايداي",
     cats:{"سلاسل":"سلاسل","خواتم":"خواتم","أساور":"أساور","أطقم":"أطقم","ساعات":"ساعات"}
   },
@@ -457,7 +461,10 @@ const I18N = {
     co_err_fill:"Please fill in your name, mobile number and address", co_err_phone:"Mobile number must be 11 digits starting with 01",
     co_copy:"Copy", co_copied:"Copied ✅",
     co_pay_cod:"Cash on delivery", co_pay_wallet:(w)=>`Wallet transfer (${w})`, co_instapay:"Pay with InstaPay ⚡",
-    msg_order:(lines,total,name,phone,addr,pay)=>`Hi 👋 New order from the website 🛍️\n${lines}\nTotal: ${total} EGP\n—————\nName: ${name}\nMobile: ${phone}\nAddress: ${addr}\nPayment: ${pay}`,
+    co_subtotal:"Subtotal", co_discount:"Discount 15%", co_total:"Total",
+    co_hint:(x)=>`Add ${x} EGP more to get 15% off 🎁`,
+    totals:(sub,disc,total)=> disc>0 ? `Subtotal: ${sub} EGP\nDiscount 15%: -${disc} EGP\nTotal: ${total} EGP` : `Total: ${total} EGP`,
+    msg_order:(lines,totalsText,name,phone,addr,pay)=>`Hi 👋 New order from the website 🛍️\n${lines}\n${totalsText}\n—————\nName: ${name}\nMobile: ${phone}\nAddress: ${addr}\nPayment: ${pay}`,
     cat_all:"All", cat_men:"Men", feat_badge:"White Friday",
     cats:{"سلاسل":"Necklaces","خواتم":"Rings","أساور":"Bracelets","أطقم":"Sets","ساعات":"Watches"}
   }
@@ -655,8 +662,9 @@ function cartSummary(){
     const t = LANG==='ar'? c.t : c.te;
     return {text:`• ${t} ×${counts[i]} - ${c.price*counts[i]} ${T().egp}`, amt:c.price*counts[i]};
   });
-  const total = lines.reduce((s,l)=>s+l.amt,0);
-  return {lines, total};
+  const sub = lines.reduce((s,l)=>s+l.amt,0);
+  const disc = sub > 500 ? Math.round(sub*0.15) : 0;
+  return {lines, sub, disc, total: sub - disc};
 }
 
 function renderWallets(){
@@ -670,9 +678,17 @@ function renderWallets(){
 
 $('#cartPill').addEventListener('click', ()=>{
   if(!cart.length) return;
-  const {lines,total} = cartSummary();
-  $('#coItems').innerHTML = lines.map(l=>`<div class="co-line"><span>${l.text}</span></div>`).join('')
-    + `<div class="co-total"><span>${LANG==='ar'?'الإجمالي':'Total'}</span><span>${total} ${T().egp}</span></div>`;
+  const {lines,sub,disc,total} = cartSummary();
+  let rows = lines.map(l=>`<div class="co-line"><span>${l.text}</span></div>`).join('');
+  rows += `<div class="co-line"><span>${T().co_subtotal}</span><span>${sub} ${T().egp}</span></div>`;
+  if(disc>0){
+    rows += `<div class="co-line" style="color:var(--green); font-weight:700;"><span>${T().co_discount} 🎉</span><span>-${disc} ${T().egp}</span></div>`;
+  }
+  rows += `<div class="co-total"><span>${T().co_total}</span><span>${total} ${T().egp}</span></div>`;
+  if(disc===0 && sub>0 && sub<=500){
+    rows += `<p class="hint">${T().co_hint(501-sub)}</p>`;
+  }
+  $('#coItems').innerHTML = rows;
   renderWallets();
   $('#walletBox').classList.toggle('show', payMethod==='wallet');
   $('#coErr').classList.remove('show');
@@ -704,10 +720,10 @@ $('#coSubmit').addEventListener('click', ()=>{
   if(!name || !phone || !addr){ err.textContent = T().co_err_fill; err.classList.add('show'); return; }
   if(!/^01\d{9}$/.test(phone)){ err.textContent = T().co_err_phone; err.classList.add('show'); return; }
   err.classList.remove('show');
-  const {lines,total} = cartSummary();
+  const {lines,sub,disc,total} = cartSummary();
   const walletNames = CONFIG.wallets.map(w=>`${LANG==='ar'?w.nameAr:w.nameEn} ${w.num}`).join(' / ');
   const pay = payMethod==='cod' ? T().co_pay_cod : T().co_pay_wallet(walletNames);
-  const msg = T().msg_order(lines.map(l=>l.text).join('\n'), total, name, phone, addr, pay);
+  const msg = T().msg_order(lines.map(l=>l.text).join('\n'), T().totals(sub,disc,total), name, phone, addr, pay);
   window.open(waLink(msg), '_blank');
   cart = []; renderCart();
   $('#coModal').classList.remove('open');
