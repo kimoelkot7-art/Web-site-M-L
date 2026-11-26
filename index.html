@@ -238,6 +238,15 @@ section{padding:44px 0;}
 .form-err{color:#ff7b7b; font-size:13px; text-align:center; margin-bottom:10px; display:none;}
 .form-err.show{display:block;}
 .hint{font-size:13px; color:var(--amber); text-align:center; margin-top:8px; font-weight:700;}
+.co-line .nm{flex:1;}
+.qty-ctl{display:flex; align-items:center; gap:8px;}
+.qty-btn{
+  width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line);
+  color:var(--amber); font-size:15px; font-weight:800; line-height:1;
+  display:flex; align-items:center; justify-content:center; transition:.2s;
+}
+.qty-btn:hover{border-color:var(--amber); background:rgba(236,161,52,.12);}
+.qty-n{min-width:20px; text-align:center; font-weight:800; color:var(--amber);}
 
 /* ---------- toast ---------- */
 .toast{
@@ -678,8 +687,28 @@ function renderWallets(){
 
 $('#cartPill').addEventListener('click', ()=>{
   if(!cart.length) return;
+  renderCheckout();
+  $('#coErr').classList.remove('show');
+  $('#coModal').classList.add('open');
+});
+
+function renderCheckout(){
+  const counts = {};
+  cart.forEach(i=> counts[i]=(counts[i]||0)+1);
   const {lines,sub,disc,total} = cartSummary();
-  let rows = lines.map(l=>`<div class="co-line"><span>${l.text}</span></div>`).join('');
+  let rows = Object.keys(counts).map(i=>{
+    const c = CARDS[i];
+    const t = LANG==='ar'? c.t : c.te;
+    return `<div class="co-line">
+      <span class="nm">• ${t}</span>
+      <span class="qty-ctl">
+        <button class="qty-btn" data-dec="${i}" aria-label="less">−</button>
+        <span class="qty-n">${counts[i]}</span>
+        <button class="qty-btn" data-inc="${i}" aria-label="more">+</button>
+      </span>
+      <span class="q">${c.price*counts[i]} ${T().egp}</span>
+    </div>`;
+  }).join('');
   rows += `<div class="co-line"><span>${T().co_subtotal}</span><span>${sub} ${T().egp}</span></div>`;
   if(disc>0){
     rows += `<div class="co-line" style="color:var(--green); font-weight:700;"><span>${T().co_discount} 🎉</span><span>-${disc} ${T().egp}</span></div>`;
@@ -691,8 +720,20 @@ $('#cartPill').addEventListener('click', ()=>{
   $('#coItems').innerHTML = rows;
   renderWallets();
   $('#walletBox').classList.toggle('show', payMethod==='wallet');
-  $('#coErr').classList.remove('show');
-  $('#coModal').classList.add('open');
+}
+
+document.addEventListener('click', e=>{
+  const inc = e.target.closest('[data-inc]');
+  const dec = e.target.closest('[data-dec]');
+  if(inc){
+    cart.push(+inc.dataset.inc);
+  }else if(dec){
+    const idx = cart.indexOf(+dec.dataset.dec);
+    if(idx>-1) cart.splice(idx,1);
+  }else return;
+  renderCart();
+  if(!cart.length){ $('#coModal').classList.remove('open'); return; }
+  renderCheckout();
 });
 $('#coClose').addEventListener('click', ()=> $('#coModal').classList.remove('open'));
 $('#coModal').addEventListener('click', e=>{ if(e.target===e.currentTarget) $('#coModal').classList.remove('open'); });
