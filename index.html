@@ -624,7 +624,8 @@ function groupCatalog(products){
       te: cur? cur.te : deriveTitle(canon.name||''),
       de: cur? cur.de : 'From the M&L collection ✨',
       c: cur? cur.c : classify(canon.name||''),
-      m: matOf(canon.name||'')
+      m: matOf(canon.name||''),
+      men: /رجال/.test(canon.name||'')
     });
   }
   return cards;
@@ -678,9 +679,10 @@ function renderChips(){
 }
 
 function renderGrid(){
-  const list = activeCat==='all' ? CARDS : CARDS.filter(c=>c.c===activeCat);
-  $('#menEmpty').style.display = activeCat==='men' ? '' : 'none';
-  $('#grid').style.display = activeCat==='men' ? 'none' : '';
+  const list = activeCat==='all' ? CARDS : activeCat==='men' ? CARDS.filter(c=>c.men) : CARDS.filter(c=>c.c===activeCat);
+  const menEmpty = activeCat==='men' && !list.length;
+  $('#menEmpty').style.display = menEmpty ? '' : 'none';
+  $('#grid').style.display = menEmpty ? 'none' : '';
   $('#grid').innerHTML = list.map(c=>cardHTML(c, CARDS.indexOf(c), false)).join('');
 }
 
