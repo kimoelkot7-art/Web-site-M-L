@@ -341,7 +341,7 @@ footer{border-top:1px solid var(--line); padding:26px 0; text-align:center; colo
 
 <section class="hero">
   <div class="wrap">
-    <p class="kicker" data-i18n="kicker">إكسسوارات • ستانلس ستيل • أسعار في المتناول</p>
+    <p class="kicker" data-i18n="kicker">إكسسوارات • جولد بليتد وستانلس ستيل • أسعار في المتناول</p>
     <h1 data-i18n="hero_title">لمستك في كل قطعة</h1>
     <p data-i18n="hero_sub">سلاسل، خواتم، أساور، ساعات وكومبوهات مختارة بعناية. شوف اللي يعجبك واطلبه واتساب في ثانية.</p>
     <div class="cta-row">
@@ -448,7 +448,7 @@ footer{border-top:1px solid var(--line); padding:26px 0; text-align:center; colo
     <h3 class="pd-name" id="pdName"></h3>
     <p class="pd-desc" id="pdDesc"></p>
     <div class="pd-meta">
-      <span class="pd-tag" data-i18n="pd_material">الخامة: ستانلس ستيل ✨</span>
+      <span class="pd-tag" id="pdMat"></span>
     </div>
     <div class="pd-price-row">
       <span class="pd-price" id="pdPrice"></span>
@@ -485,7 +485,7 @@ const CONFIG = {
 const I18N = {
   ar: {
     nav_home:"الرئيسية", nav_products:"المنتجات", nav_about:"حكايتنا", nav_contact:"تواصل معنا",
-    kicker:"إكسسوارات • ستانلس ستيل • أسعار في المتناول",
+    kicker:"إكسسوارات • جولد بليتد وستانلس ستيل • أسعار في المتناول",
     hero_title:"لمستك في كل قطعة",
     hero_sub:"سلاسل، خواتم، أساور، ساعات وكومبوهات مختارة بعناية. شوف اللي يعجبك واطلبه واتساب في ثانية.",
     cta_shop:"تسوق دلوقتي", cta_bot:"كلم المساعد الذكي 🤖",
@@ -511,7 +511,6 @@ const I18N = {
     co_subtotal:"المجموع", co_discount:"خصم 15%", co_total:"الإجمالي",
     co_hint:(x)=>`فاضل ${x} جنيه وتاخد خصم 15% 🎁`,
     co_note:"هنأكد أوردرك على واتساب خلال دقائق ⏱️",
-    pd_material:"الخامة: ستانلس ستيل ✨",
     pd_offer:"خصم 15% على الأوردر فوق 500 جنيه 🎁",
     pd_add:"ضيف للأوردر 🛒",
     trust_1:"توصيل للقاهرة وكل المحافظات",
@@ -526,7 +525,7 @@ const I18N = {
   },
   en: {
     nav_home:"Home", nav_products:"Products", nav_about:"Our Story", nav_contact:"Contact",
-    kicker:"ACCESSORIES • STAINLESS STEEL • FAIR PRICES",
+    kicker:"ACCESSORIES • GOLD PLATED & STAINLESS STEEL • FAIR PRICES",
     hero_title:"Your touch in every piece",
     hero_sub:"Necklaces, rings, bracelets, watches and combos, picked with care. Find what you love and order it on WhatsApp in seconds.",
     cta_shop:"Shop Now", cta_bot:"Ask our smart assistant 🤖",
@@ -552,7 +551,7 @@ const I18N = {
     co_subtotal:"Subtotal", co_discount:"Discount 15%", co_total:"Total",
     co_hint:(x)=>`Add ${x} EGP more to get 15% off 🎁`,
     co_note:"We'll confirm your order on WhatsApp within minutes ⏱️",
-    pd_material:"Material: stainless steel ✨",
+    
     pd_offer:"15% off orders over 500 EGP 🎁",
     pd_add:"Add to order 🛒",
     trust_1:"Delivery to Cairo and all governorates",
@@ -598,6 +597,13 @@ function deriveTitle(name){
 }
 function normKey(name){ return name.replace(/\s+/g,' ').slice(0,30); }
 
+function matOf(name){
+  const g=/gold\s*plated|جولد\s*بليتد/i.test(name), st=/stainless|ستانلس/i.test(name);
+  if(g&&st) return {ar:"الخامة: جولد بليتد + ستانلس ستيل ✨", en:"Material: gold plated + stainless steel ✨"};
+  if(g) return {ar:"الخامة: جولد بليتد ✨", en:"Material: gold plated ✨"};
+  if(st) return {ar:"الخامة: ستانلس ستيل ✨", en:"Material: stainless steel ✨"};
+  return null;
+}
 function groupCatalog(products){
   const groups = new Map();
   for(const p of products){
@@ -617,7 +623,8 @@ function groupCatalog(products){
       d: cur? cur.d : (LANG==='ar' ? 'من تشكيلة M&L ✨' : 'From the M&L collection ✨'),
       te: cur? cur.te : deriveTitle(canon.name||''),
       de: cur? cur.de : 'From the M&L collection ✨',
-      c: cur? cur.c : classify(canon.name||'')
+      c: cur? cur.c : classify(canon.name||''),
+      m: matOf(canon.name||'')
     });
   }
   return cards;
@@ -766,6 +773,7 @@ function openProduct(i){
   $('#pdCat').textContent = T().cats[c.c]||c.c;
   $('#pdName').textContent = t;
   $('#pdDesc').textContent = d;
+  const mt=$('#pdMat'); if(c.m){ mt.textContent = LANG==='ar'? c.m.ar : c.m.en; mt.style.display=''; } else { mt.style.display='none'; }
   $('#pdPrice').innerHTML = `${c.price} <small>${T().egp}</small>`;
   $('#pdOrder').textContent = T().order_wa;
   $('#pdModal').classList.add('open');
