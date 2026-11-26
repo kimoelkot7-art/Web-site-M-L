@@ -258,12 +258,41 @@ section{padding:44px 0;}
 .qty-btn:hover{border-color:var(--amber); background:rgba(236,161,52,.12);}
 .qty-n{min-width:20px; text-align:center; font-weight:800; color:var(--amber);}
 
+/* ---------- trust strip ---------- */
+.trust{border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:rgba(236,161,52,.05);}
+.trust-in{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px 0;}
+.trust-item{text-align:center; font-size:12.5px; color:var(--ivory-2); font-weight:500; line-height:1.55;}
+.trust-item .ti{font-size:20px; display:block; margin-bottom:5px;}
+
+/* ---------- product detail modal ---------- */
+.pd-gallery{position:relative; border-radius:16px; overflow:hidden; margin-bottom:16px; background:var(--card);}
+.pd-gallery img{width:100%; aspect-ratio:3/3.4; object-fit:cover; display:block; cursor:pointer;}
+.pdots{position:absolute; bottom:10px; left:0; right:0; display:flex; gap:6px; justify-content:center; z-index:2;}
+.pdots i{width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); cursor:pointer;}
+.pdots i.on{background:var(--amber);}
+.pd-cat{font-size:12.5px; color:var(--amber); font-weight:700; margin-bottom:2px;}
+.pd-name{font-size:21px; text-align:start !important; margin-bottom:6px !important;}
+.pd-desc{font-size:14.5px; color:var(--ivory-2); margin-bottom:12px;}
+.pd-meta{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
+.pd-tag{border:1.5px solid var(--line); border-radius:999px; padding:4px 14px; font-size:12.5px; color:var(--ivory-2);}
+.pd-price-row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px;}
+.pd-price{font-size:26px; font-weight:800; color:var(--amber);}
+.pd-price small{font-size:14px; color:var(--ivory-2); font-weight:500;}
+.pd-offer{font-size:12.5px; color:var(--amber); font-weight:700;}
+.pd-actions{display:flex; gap:8px;}
+.pd-actions .order-btn{flex:1.6; padding:14px 12px; font-size:15px;}
+.pd-add{
+  flex:1; border-radius:999px; border:1.5px solid var(--amber); color:var(--amber);
+  font-weight:800; font-size:14.5px; transition:.2s;
+}
+.pd-add:hover{background:rgba(236,161,52,.12);}
+
 /* ---------- toast ---------- */
 .toast{
   position:fixed; top:74px; left:50%; transform:translateX(-50%) translateY(-16px);
   background:var(--card); border:1px solid var(--amber); color:var(--ivory);
   padding:10px 22px; border-radius:999px; font-size:14px; font-weight:700;
-  opacity:0; pointer-events:none; transition:.3s; z-index:70;
+  opacity:0; pointer-events:none; transition:.3s; z-index:100;
 }
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
@@ -319,6 +348,14 @@ footer{border-top:1px solid var(--line); padding:26px 0; text-align:center; colo
       <a href="#products" class="btn btn-amber" data-i18n="cta_shop">تسوق دلوقتي</a>
       <a class="btn btn-ghost" id="heroBot" target="_blank" rel="noopener" data-i18n="cta_bot">كلم المساعد الذكي 🤖</a>
     </div>
+  </div>
+</section>
+
+<section class="trust">
+  <div class="wrap trust-in">
+    <div class="trust-item"><span class="ti">🚚</span><span data-i18n="trust_1">توصيل للقاهرة وكل المحافظات</span></div>
+    <div class="trust-item"><span class="ti">💬</span><span data-i18n="trust_2">مصاريف الشحن بتتأكد على واتساب مع الأوردر</span></div>
+    <div class="trust-item"><span class="ti">🛡️</span><span data-i18n="trust_3">استرجاع لعيوب التصنيع خلال ٣ أيام من الاستلام</span></div>
   </div>
 </section>
 
@@ -403,6 +440,27 @@ footer{border-top:1px solid var(--line); padding:26px 0; text-align:center; colo
     <p class="co-note" data-i18n="co_note">هنأكد أوردرك على واتساب خلال دقائق ⏱️</p>
   </div>
 </div>
+<div class="modal-bg" id="pdModal">
+  <div class="modal" style="position:relative;">
+    <button class="co-close" id="pdClose" aria-label="close">✕</button>
+    <div class="pd-gallery" id="pdImgs"></div>
+    <p class="pd-cat" id="pdCat"></p>
+    <h3 class="pd-name" id="pdName"></h3>
+    <p class="pd-desc" id="pdDesc"></p>
+    <div class="pd-meta">
+      <span class="pd-tag" data-i18n="pd_material">الخامة: ستانلس ستيل ✨</span>
+    </div>
+    <div class="pd-price-row">
+      <span class="pd-price" id="pdPrice"></span>
+      <span class="pd-offer" data-i18n="pd_offer">خصم 15% على الأوردر فوق 500 جنيه 🎁</span>
+    </div>
+    <div class="pd-actions">
+      <button class="order-btn" id="pdOrder">اطلب واتساب</button>
+      <button class="pd-add" id="pdAdd" data-i18n="pd_add">ضيف للأوردر 🛒</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -453,6 +511,12 @@ const I18N = {
     co_subtotal:"المجموع", co_discount:"خصم 15%", co_total:"الإجمالي",
     co_hint:(x)=>`فاضل ${x} جنيه وتاخد خصم 15% 🎁`,
     co_note:"هنأكد أوردرك على واتساب خلال دقائق ⏱️",
+    pd_material:"الخامة: ستانلس ستيل ✨",
+    pd_offer:"خصم 15% على الأوردر فوق 500 جنيه 🎁",
+    pd_add:"ضيف للأوردر 🛒",
+    trust_1:"توصيل للقاهرة وكل المحافظات",
+    trust_2:"مصاريف الشحن بتتأكد على واتساب مع الأوردر",
+    trust_3:"استرجاع لعيوب التصنيع خلال ٣ أيام من الاستلام",
     share_text:"اكسسوارات M&L ✨ شوف التشكيلة واطلب واتساب",
     share_copied:"اتنسخ لينك المتجر ✅",
     totals:(sub,disc,total)=> disc>0 ? `المجموع: ${sub} جنيه\nخصم 15%: -${disc} جنيه\nالإجمالي: ${total} جنيه` : `الإجمالي: ${total} جنيه`,
@@ -488,6 +552,12 @@ const I18N = {
     co_subtotal:"Subtotal", co_discount:"Discount 15%", co_total:"Total",
     co_hint:(x)=>`Add ${x} EGP more to get 15% off 🎁`,
     co_note:"We'll confirm your order on WhatsApp within minutes ⏱️",
+    pd_material:"Material: stainless steel ✨",
+    pd_offer:"15% off orders over 500 EGP 🎁",
+    pd_add:"Add to order 🛒",
+    trust_1:"Delivery to Cairo and all governorates",
+    trust_2:"Shipping fees are confirmed on WhatsApp with your order",
+    trust_3:"Returns for manufacturing defects within 3 days of delivery",
     share_text:"M&L accessories ✨ browse the collection and order on WhatsApp",
     share_copied:"Store link copied ✅",
     totals:(sub,disc,total)=> disc>0 ? `Subtotal: ${sub} EGP\nDiscount 15%: -${disc} EGP\nTotal: ${total} EGP` : `Total: ${total} EGP`,
@@ -677,14 +747,69 @@ document.addEventListener('click', e=>{
     return;
   }
 
-  // tap image with multiple photos -> next photo
+  // tap product image -> open product detail view
   const thumb = e.target.closest('.thumb');
-  if(thumb && thumb.querySelectorAll('img').length > 1 && !e.target.closest('.dots')){
-    const imgs = [...thumb.querySelectorAll('img')];
+  if(thumb && !e.target.closest('.dots')){
+    openProduct(+thumb.dataset.card);
+  }
+});
+
+/* ---------- product detail ---------- */
+let pdIdx = null;
+function openProduct(i){
+  pdIdx = i;
+  const c = CARDS[i];
+  const t = LANG==='ar'? c.t : c.te;
+  const d = LANG==='ar'? c.d : c.de;
+  $('#pdImgs').innerHTML = c.imgs.map((im,j)=>`<img src="${CONFIG.imgBase}${im}" alt="${t}" style="${j?'display:none;':''}">`).join('')
+    + (c.imgs.length>1 ? `<div class="pdots">${c.imgs.map((_,j)=>`<i class="${j?'':'on'}" data-pimg="${j}"></i>`).join('')}</div>` : '');
+  $('#pdCat').textContent = T().cats[c.c]||c.c;
+  $('#pdName').textContent = t;
+  $('#pdDesc').textContent = d;
+  $('#pdPrice').innerHTML = `${c.price} <small>${T().egp}</small>`;
+  $('#pdOrder').textContent = T().order_wa;
+  $('#pdModal').classList.add('open');
+}
+$('#pdClose').addEventListener('click', ()=> $('#pdModal').classList.remove('open'));
+$('#pdModal').addEventListener('click', e=>{ if(e.target===e.currentTarget) $('#pdModal').classList.remove('open'); });
+$('#pdOrder').addEventListener('click', ()=>{
+  if(pdIdx===null) return;
+  cart.push(pdIdx);
+  renderCart();
+  $('#pdModal').classList.remove('open');
+  renderCheckout();
+  $('#coErr').classList.remove('show');
+  $('#coModal').classList.add('open');
+});
+$('#pdAdd').addEventListener('click', ()=>{
+  if(pdIdx===null) return;
+  cart.push(pdIdx);
+  renderCart();
+  const toast = $('#toast');
+  toast.textContent = T().added;
+  toast.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>toast.classList.remove('show'), 1800);
+});
+
+// gallery inside product detail: dots + tap to cycle
+document.addEventListener('click', e=>{
+  const pdot = e.target.closest('#pdImgs .pdots i');
+  if(pdot){
+    const gal = $('#pdImgs');
+    const target = +pdot.dataset.pimg;
+    gal.querySelectorAll('img').forEach((im,i)=> im.style.display = i===target ? '' : 'none');
+    gal.querySelectorAll('.pdots i').forEach((dd,i)=> dd.classList.toggle('on', i===target));
+    return;
+  }
+  const pimg = e.target.closest('#pdImgs img');
+  if(pimg){
+    const gal = $('#pdImgs');
+    const imgs = [...gal.querySelectorAll('img')];
+    if(imgs.length<2) return;
     const cur = imgs.findIndex(im=>im.style.display!=='none');
     const nxt = (cur+1) % imgs.length;
     imgs.forEach((im,i)=> im.style.display = i===nxt ? '' : 'none');
-    thumb.querySelectorAll('.dots i').forEach((d,i)=> d.classList.toggle('on', i===nxt));
+    gal.querySelectorAll('.pdots i').forEach((dd,i)=> dd.classList.toggle('on', i===nxt));
   }
 });
 
